@@ -1,0 +1,966 @@
+<yb_canvas uuid="a7b8c9d0-1e2f-3a4b-5c6d-7e8f9a0b1c2d" mversion="1" type="code" subtype="single">
+
+<filename>文字冒险游戏.html</filename>
+
+<yb_code lang="html"><![CDATA[<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>命运：异乡人 | 文字冒险游戏</title>
+
+<style>
+
+* { margin: 0; padding: 0; box-sizing: border-box; }body {font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;background: #1a1a2e;color: #e0e0e0;line-height: 1.6;padding: 20px;}.container {max-width: 900px;margin: 0 auto;background: rgba(0,0,0,0.8);padding: 20px;border-radius: 10px;border: 1px solid #333;}.game-header {text-align: center;margin-bottom: 30px;padding: 20px;background: linear-gradient(135deg, #0f3460, #16213e);border-radius: 10px;}.game-title {font-size: 2.5em;color: #ffd700;text-shadow: 2px 2px 4px rgba(0,0,0,0.5);margin-bottom: 10px;}.game-subtitle {color: #aaa;font-size: 1.2em;}.game-content {display: grid;grid-template-columns: 1fr 300px;gap: 20px;}.story-container {background: rgba(0,0,0,0.9);padding: 20px;border-radius: 10px;border: 1px solid #444;}.story-text {font-size: 1.1em;margin-bottom: 20px;min-height: 300px;}.choices {display: flex;flex-direction: column;gap: 10px;}.choice-btn {padding: 12px 20px;background: #2c3e50;color: white;border: none;border-radius: 5px;cursor: pointer;text-align: left;transition: all 0.3s;}.choice-btn:hover {background: #34495e;transform: translateX(5px);}.stats-panel {background: rgba(0,0,0,0.9);padding: 20px;border-radius: 10px;border: 1px solid #444;}.stat-item {margin: 10px 0;padding: 10px;background: rgba(255,255,255,0.05);border-radius: 5px;}.stat-bar {height: 10px;background: #444;border-radius: 5px;margin-top: 5px;overflow: hidden;}.stat-fill {height: 100%;background: #3498db;border-radius: 5px;}.health-fill { background: #e74c3c; }.sanity-fill { background: #9b59b6; }.stamina-fill { background: #2ecc71; }.dev-menu {position: fixed;top: 10px;right: 10px;background: rgba(0,0,0,0.95);color: #0f0;border: 2px solid #0f0;border-radius: 5px;font-family: monospace;font-size: 12px;z-index: 9999;width: 300px;}.dev-header {background: #111;padding: 8px 12px;cursor: pointer;font-weight: bold;display: flex;justify-content: space-between;}.dev-content {padding: 10px;max-height: 400px;overflow-y: auto;}.dev-section {margin-bottom: 15px;padding-bottom: 10px;border-bottom: 1px solid #333;}.dev-section h4 {margin: 0 0 8px 0;color: #0ff;font-size: 12px;}.attr-control {margin-bottom: 5px;padding: 3px 0;}.attr-control label {display: block;margin-bottom: 3px;color: #ccc;}.attr-buttons {display: flex;gap: 5px;align-items: center;}.attr-buttons button {background: #333;color: #0f0;border: 1px solid #0f0;padding: 2px 6px;border-radius: 3px;cursor: pointer;}.state-dump {background: #111;color: #0f0;padding: 8px;border-radius: 3px;font-size: 10px;max-height: 150px;overflow-y: auto;}button {background: #333;color: #0f0;border: 1px solid #0f0;padding: 4px 8px;margin: 2px;border-radius: 3px;cursor: pointer;}button:hover { background: #444; }.game-footer {text-align: center;margin-top: 20px;color: #666;font-size: 0.9em;}</style></head><body><div class="container"><div class="game-header"></div>
+
+<div class="game-content">
+
+<div class="story-container">
+
+<div class="story-text" id="story-text">
+
+</div>
+
+<div class="choices" id="choices-container">
+
+<button class="choice-btn" onclick="makeChoice(1)">先去学校报到</button>
+
+<button class="choice-btn" onclick="makeChoice(2)">联系之前联系好的租房中介</button>
+
+<button class="choice-btn" onclick="makeChoice(3)">在机场找临时工作</button>
+
+</div>
+
+</div>
+
+<div class="stats-panel">
+
+<div class="stat-item">
+
+<div>💰 金钱: 美元</div>
+
+</div>
+
+<div class="stat-item">
+
+<div>❤️ 健康: /100</div>
+
+<div class="stat-bar"><div class="stat-fill health-fill" id="health-bar" style="width: 100%"></div></div>
+
+</div>
+
+<div class="stat-item">
+
+<div>🧠 理智: /100</div>
+
+<div class="stat-bar"><div class="stat-fill sanity-fill" id="sanity-bar" style="width: 100%"></div></div>
+
+</div>
+
+<div class="stat-item">
+
+<div>💪 耐力: /100</div>
+
+<div class="stat-bar"><div class="stat-fill stamina-fill" id="stamina-bar" style="width: 100%"></div></div>
+
+</div>
+
+<div class="stat-item">
+
+<div>🎯 隐匿: /100</div>
+
+</div>
+
+<div class="stat-item">
+
+<div>🍀 运气: /100</div>
+
+</div>
+
+<div class="stat-item">
+
+<div>💳 债务: 美元</div>
+
+</div>
+
+<div class="stat-item">
+
+<div>⚠️ 成瘾: /100</div>
+
+</div>
+
+<div id="current-scene">S00 - 抵达</div>
+
+<div style="margin-top: 20px; color: #888; font-size: 0.9em;">
+
+</div>
+
+</div>
+
+</div>
+
+<div class="game-footer">
+
+</div>
+
+</div>
+
+<!-- 开发者菜单 -->
+
+<div id="dev-menu" class="dev-menu" style="display: none;">
+
+<div class="dev-header" onclick="toggleDevMenu()">
+
+🛠️ 开发者菜单 ▲
+
+</div>
+
+<div class="dev-content" id="dev-content">
+
+<div class="dev-section">
+
+<div class="attr-control">
+
+<label>💰 金钱: </label>
+
+<div class="attr-buttons">
+
+<button onclick="cheatMoney(100)">+100</button>
+
+<button onclick="cheatMoney(1000)">+1000</button>
+
+<button onclick="cheatMoney(10000)">+10000</button>
+
+<button onclick="setMoney(0)">清零</button>
+
+</div>
+
+</div>
+
+<div class="attr-control">
+
+<label>❤️ 健康: /100</label>
+
+<div class="attr-buttons">
+
+<button onclick="setHealth(100)">回满</button>
+
+<button onclick="modifyHealth(-10)">-10</button>
+
+<button onclick="modifyHealth(-20)">-20</button>
+
+<button onclick="modifyHealth(10)">+10</button>
+
+</div>
+
+</div>
+
+<div class="attr-control">
+
+<label>🧠 理智: /100</label>
+
+<div class="attr-buttons">
+
+<button onclick="setSanity(100)">回满</button>
+
+<button onclick="modifySanity(-10)">-10</button>
+
+<button onclick="modifySanity(10)">+10</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="dev-section">
+
+<button onclick="cheatGodMode()">上帝模式</button>
+
+<button onclick="cheatFullRestore()">完全恢复</button>
+
+<button onclick="cheatClearDebt()">清除债务</button>
+
+<button onclick="cheatReset()">重置状态</button>
+
+</div>
+
+<div class="dev-section">
+
+<select id="scene-select" onchange="jumpToScene(this.value)">
+
+<option value="">选择场景...</option>
+
+<option value="S00">S00 - 抵达</option>
+
+<option value="S01">S01 - 学校报到</option>
+
+<option value="S02">S02 - 租房遭遇</option>
+
+<option value="S03">S03 - 找工作</option>
+
+<option value="S04">S04 - 第一天工作</option>
+
+<option value="S05">S05 - 艰难抉择</option>
+
+</select>
+
+</div>
+
+<div class="dev-section">
+
+<button onclick="exportGame()">导出存档</button>
+
+<button onclick="importGame()">导入存档</button>
+
+<input type="file" id="import-file" style="display: none" onchange="handleImportFile(event)">
+
+<button onclick="copyGameState()">复制状态</button>
+
+</div>
+
+<div class="dev-section">
+
+<div class="state-dump" id="state-dump">点击刷新查看</div>
+
+<button onclick="updateStateDump()">刷新状态</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+// 游戏状态
+
+const gameState = {
+
+money: 500,
+
+health: 100,
+
+sanity: 100,
+
+stamina: 100,
+
+stealth: 0,
+
+luck: 0,
+
+debt: 0,
+
+addiction: 0,
+
+day: 1,
+
+scene: 'S00',
+
+devMode: false
+
+};
+
+// 故事数据
+
+const storyData = {
+
+'S00': {
+
+title: '抵达',
+
+text: '飞机降落在肯尼迪机场，你拖着沉重的行李走出舱门。这里是纽约，无数人梦想开始的地方，也是你未知命运的开端。作为一个来自东方的留学生，你怀揣着家人的期望和自己的梦想踏上这片土地。但你知道，接下来的路不会平坦...',
+
+choices: [
+
+{ text: '先去学校报到', next: 'S01', money: -50, sanity: 5 },
+
+{ text: '联系租房中介', next: 'S02', money: -200, sanity: -10 },
+
+{ text: '在机场找临时工作', next: 'S03', stamina: -20, money: 100 }
+
+]
+
+},
+
+'S01': {
+
+title: '学校报到',
+
+text: '你乘坐地铁来到学校。国际学生办公室的队伍排得很长，等了两个小时才轮到你。工作人员告诉你，学费还欠着3000美元，需要在两周内缴清，否则会影响签证状态。',
+
+choices: [
+
+{ text: '打电话向家里求助', next: 'S05', sanity: 10, debt: 0 },
+
+{ text: '申请校内打工', next: 'S03', sanity: -5, stamina: -10 },
+
+{ text: '找高利贷借钱', next: 'S05', money: 3000, debt: 3500, sanity: -20 }
+
+]
+
+},
+
+'S02': {
+
+title: '租房遭遇',
+
+text: '中介带你来到布鲁克林的一间地下室。房间只有10平米，窗户对着墙壁，但月租要800美元。中介告诉你，这是附近最便宜的了，而且需要押一付三。',
+
+choices: [
+
+{ text: '咬牙租下', next: 'S04', money: -3200, sanity: -15, stamina: -5 },
+
+{ text: '先住青旅再找', next: 'S04', money: -200, sanity: -5 },
+
+{ text: '找华人分租房', next: 'S04', money: -600, sanity: -10, stealth: 5 }
+
+]
+
+},
+
+'S03': {
+
+title: '找工作',
+
+text: '你在街头看到中餐馆招工广告，时薪8美元。老板是个福建人，打量了你一番说："没身份？现金工，每天12小时，愿意就明天来。"',
+
+choices: [
+
+{ text: '接受工作', next: 'S04', money: 300, stamina: -30, sanity: -20 },
+
+{ text: '继续找合法工作', next: 'S01', money: -100 },
+
+{ text: '试试外卖平台', next: 'S04', money: 200, stamina: -25, luck: 5 }
+
+]
+
+},
+
+'S04': {
+
+title: '第一天工作',
+
+text: '凌晨4点起床，挤地铁到餐馆。从早到晚洗盘子、切菜、打扫卫生。老板故意找茬扣了你半天工资。晚上11点回到住处，浑身酸痛。',
+
+choices: [
+
+{ text: '咬牙坚持', next: 'S05', money: 200, health: -10, stamina: -20 },
+
+{ text: '买瓶酒解乏', next: 'S05', money: -20, health: -5, sanity: 5, addiction: 5 },
+
+{ text: '去教堂求助', next: 'S01', sanity: 10, luck: 5 }
+
+]
+
+},
+
+'S05': {
+
+title: '艰难抉择',
+
+text: '第一个月的账单来了：房租800、电话费50、交通费120、食物200，而你打工只赚了1200美元。还欠着学费3000。你看着窗外的纽约夜景，陷入了沉思...',
+
+choices: [
+
+{ text: '打黑工多赚钱', next: 'S03', money: 500, stamina: -30, stealth: 10 },
+
+{ text: '申请助学贷款', next: 'S01', debt: 5000, sanity: 10 },
+
+{ text: '联系蛇头想别的办法', next: 'END1', stealth: 20, sanity: -30 }
+
+]
+
+},
+
+'END1': {
+
+title: '结局：未知之路',
+
+text: '三个月后，你在前往美墨边境的卡车上被捕。遣返、黑名单、梦想破灭。但这也许不是终点，只是另一段挣扎的开始...',
+
+choices: [
+
+{ text: '重新开始', next: 'S00' }
+
+]
+
+}
+
+};
+
+// 更新UI
+
+function updateUI() {
+
+// 更新状态
+
+document.getElementById('money').textContent = gameState.money;
+
+document.getElementById('health').textContent = gameState.health;
+
+document.getElementById('sanity').textContent = gameState.sanity;
+
+document.getElementById('stamina').textContent = gameState.stamina;
+
+document.getElementById('stealth').textContent = gameState.stealth;
+
+document.getElementById('luck').textContent = gameState.luck;
+
+document.getElementById('debt').textContent = gameState.debt;
+
+document.getElementById('addiction').textContent = gameState.addiction;
+
+document.getElementById('current-scene').textContent = 
+"${gameState.scene} - ${storyData[gameState.scene]?.title || '未知'}";
+
+// 更新进度条
+
+document.getElementById('health-bar').style.width = 
+"${gameState.health}%";
+
+document.getElementById('sanity-bar').style.width = 
+"${gameState.sanity}%";
+
+document.getElementById('stamina-bar').style.width = 
+"${gameState.stamina}%";
+
+// 更新开发者面板
+
+document.getElementById('dev-money').textContent = gameState.money;
+
+document.getElementById('dev-health').textContent = gameState.health;
+
+document.getElementById('dev-sanity').textContent = gameState.sanity;
+
+// 更新场景下拉框
+
+document.getElementById('scene-select').value = gameState.scene;
+
+// 更新故事文本
+
+const scene = storyData[gameState.scene];
+
+if (scene) {
+
+document.getElementById('story-text').innerHTML = `
+
+`;
+
+// 更新选择
+
+const choicesContainer = document.getElementById('choices-container');
+
+choicesContainer.innerHTML = '';
+
+scene.choices.forEach((choice, index) => {
+
+const button = document.createElement('button');
+
+button.className = 'choice-btn';
+
+button.textContent = choice.text;
+
+button.onclick = () => makeChoice(index);
+
+choicesContainer.appendChild(button);
+
+});
+
+}
+
+// 检查游戏结束条件
+
+checkGameOver();
+
+}
+
+// 做出选择
+
+function makeChoice(choiceIndex) {
+
+const scene = storyData[gameState.scene];
+
+if (!scene || !scene.choices[choiceIndex]) return;
+
+const choice = scene.choices[choiceIndex];
+
+// 应用效果
+
+if (choice.money) gameState.money += choice.money;
+
+if (choice.health) gameState.health = Math.max(0, Math.min(100, gameState.health + choice.health));
+
+if (choice.sanity) gameState.sanity = Math.max(0, Math.min(100, gameState.sanity + choice.sanity));
+
+if (choice.stamina) gameState.stamina = Math.max(0, Math.min(100, gameState.stamina + choice.stamina));
+
+if (choice.stealth) gameState.stealth = Math.max(0, Math.min(100, gameState.stealth + choice.stealth));
+
+if (choice.luck) gameState.luck = Math.max(0, Math.min(100, gameState.luck + choice.luck));
+
+if (choice.debt) gameState.debt += choice.debt;
+
+if (choice.addiction) gameState.addiction = Math.max(0, Math.min(100, gameState.addiction + choice.addiction));
+
+// 转到下一场景
+
+if (choice.next) {
+
+gameState.scene = choice.next;
+
+if (choice.next !== 'END1') {
+
+gameState.day++;
+
+}
+
+}
+
+updateUI();
+
+}
+
+// 检查游戏结束
+
+function checkGameOver() {
+
+if (gameState.health <= 0) {
+
+gameState.scene = 'END1';
+
+storyData['END1'] = {
+
+title: '结局：精疲力竭',
+
+text: '连续的高强度工作和营养不良击垮了你。在一个寒冷的冬夜，你因肺炎晕倒在街头，再也没有醒来。异乡的梦，就此终结。',
+
+choices: [{ text: '重新开始', next: 'S00' }]
+
+};
+
+updateUI();
+
+} else if (gameState.sanity <= 0) {
+
+gameState.scene = 'END1';
+
+storyData['END1'] = {
+
+title: '结局：精神崩溃',
+
+text: '巨大的压力和孤独感让你彻底崩溃。你被送进精神病院，随后被遣返回国。家人看到的，只是一个眼神空洞的陌生人。',
+
+choices: [{ text: '重新开始', next: 'S00' }]
+
+};
+
+updateUI();
+
+} else if (gameState.money <= -10000) {
+
+gameState.scene = 'END1';
+
+storyData['END1'] = {
+
+title: '结局：债务深渊',
+
+text: '高利贷的利滚利让你永远无法翻身。在一个雨夜，讨债人找到了你。第二天，人们在东河发现了你的尸体。',
+
+choices: [{ text: '重新开始', next: 'S00' }]
+
+};
+
+updateUI();
+
+} else if (gameState.addiction >= 100) {
+
+gameState.scene = 'END1';
+
+storyData['END1'] = {
+
+title: '结局：堕落',
+
+text: '毒品毁掉了你的一切。为了下一剂，你偷窃、抢劫，最终在帮派火拼中丧生。没人知道你的名字，没人记得你的故事。',
+
+choices: [{ text: '重新开始', next: 'S00' }]
+
+};
+
+updateUI();
+
+}
+
+}
+
+// 开发者菜单功能
+
+function toggleDevMenu() {
+
+const menu = document.getElementById('dev-menu');
+
+const content = document.getElementById('dev-content');
+
+const header = menu.querySelector('.dev-header');
+
+if (menu.style.display === 'none' || menu.style.display === '') {
+
+menu.style.display = 'block';
+
+header.innerHTML = '🛠️ 开发者菜单 ▼';
+
+updateStateDump();
+
+} else {
+
+menu.style.display = 'none';
+
+header.innerHTML = '🛠️ 开发者菜单 ▲';
+
+}
+
+}
+
+function cheatMoney(amount) {
+
+gameState.money += amount;
+
+updateUI();
+
+}
+
+function setMoney(value) {
+
+gameState.money = parseInt(value) || 0;
+
+updateUI();
+
+}
+
+function setHealth(value) {
+
+gameState.health = Math.max(0, Math.min(100, parseInt(value) || 100));
+
+updateUI();
+
+}
+
+function modifyHealth(amount) {
+
+gameState.health = Math.max(0, Math.min(100, gameState.health + amount));
+
+updateUI();
+
+}
+
+function setSanity(value) {
+
+gameState.sanity = Math.max(0, Math.min(100, parseInt(value) || 100));
+
+updateUI();
+
+}
+
+function modifySanity(amount) {
+
+gameState.sanity = Math.max(0, Math.min(100, gameState.sanity + amount));
+
+updateUI();
+
+}
+
+function cheatGodMode() {
+
+gameState.money = 999999;
+
+gameState.health = 100;
+
+gameState.sanity = 100;
+
+gameState.stamina = 100;
+
+gameState.debt = 0;
+
+gameState.addiction = 0;
+
+updateUI();
+
+alert('上帝模式激活！');
+
+}
+
+function cheatFullRestore() {
+
+gameState.health = 100;
+
+gameState.sanity = 100;
+
+gameState.stamina = 100;
+
+updateUI();
+
+alert('状态已完全恢复！');
+
+}
+
+function cheatClearDebt() {
+
+gameState.debt = 0;
+
+updateUI();
+
+alert('债务已清除！');
+
+}
+
+function cheatReset() {
+
+if (confirm('确定要重置所有状态吗？')) {
+
+gameState.money = 500;
+
+gameState.health = 100;
+
+gameState.sanity = 100;
+
+gameState.stamina = 100;
+
+gameState.stealth = 0;
+
+gameState.luck = 0;
+
+gameState.debt = 0;
+
+gameState.addiction = 0;
+
+gameState.day = 1;
+
+gameState.scene = 'S00';
+
+updateUI();
+
+alert('状态已重置！');
+
+}
+
+}
+
+function jumpToScene(sceneId) {
+
+if (sceneId && storyData[sceneId]) {
+
+gameState.scene = sceneId;
+
+updateUI();
+
+}
+
+}
+
+function exportGame() {
+
+const saveData = {
+
+...gameState,
+
+timestamp: new Date().toISOString(),
+
+version: '1.0'
+
+};
+
+const dataStr = JSON.stringify(saveData, null, 2);
+
+const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+const exportFileDefaultName = 
+"异乡人存档_${new Date().getTime()}.json";
+
+const linkElement = document.createElement('a');
+
+linkElement.setAttribute('href', dataUri);
+
+linkElement.setAttribute('download', exportFileDefaultName);
+
+linkElement.click();
+
+}
+
+function importGame() {
+
+document.getElementById('import-file').click();
+
+}
+
+function handleImportFile(event) {
+
+const file = event.target.files[0];
+
+if (!file) return;
+
+const reader = new FileReader();
+
+reader.onload = function(e) {
+
+try {
+
+const data = JSON.parse(e.target.result);
+
+Object.assign(gameState, data);
+
+updateUI();
+
+alert('存档已导入！');
+
+} catch (err) {
+
+alert('导入失败：文件格式错误');
+
+}
+
+event.target.value = '';
+
+};
+
+reader.readAsText(file);
+
+}
+
+function copyGameState() {
+
+const stateText = JSON.stringify(gameState, null, 2);
+
+navigator.clipboard.writeText(stateText).then(() => {
+
+alert('游戏状态已复制到剪贴板！');
+
+}).catch(() => {
+
+const textArea = document.createElement('textarea');
+
+textArea.value = stateText;
+
+document.body.appendChild(textArea);
+
+textArea.select();
+
+document.execCommand('copy');
+
+document.body.removeChild(textArea);
+
+alert('游戏状态已复制！');
+
+});
+
+}
+
+function updateStateDump() {
+
+document.getElementById('state-dump').textContent = JSON.stringify(gameState, null, 2);
+
+}
+
+// 全局快捷键
+
+document.addEventListener('keydown', function(e) {
+
+// Ctrl+Shift+D 切换开发者菜单
+
+if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+
+e.preventDefault();
+
+const menu = document.getElementById('dev-menu');
+
+if (menu.style.display === 'none' || menu.style.display === '') {
+
+toggleDevMenu();
+
+} else {
+
+toggleDevMenu();
+
+}
+
+}
+
+// 在开发者模式下
+
+if (document.getElementById('dev-menu').style.display !== 'none') {
+
+// Ctrl+M 加钱
+
+if (e.ctrlKey && e.key === 'm') {
+
+e.preventDefault();
+
+cheatMoney(1000);
+
+}
+
+// Ctrl+H 回血
+
+if (e.ctrlKey && e.key === 'h') {
+
+e.preventDefault();
+
+cheatFullRestore();
+
+}
+
+// Ctrl+G 上帝模式
+
+if (e.ctrlKey && e.key === 'g') {
+
+e.preventDefault();
+
+cheatGodMode();
+
+}
+
+}
+
+});
+
+// 初始化游戏
+
+updateUI();
+
+// 控制台命令
+
+window.cheat = {
+
+money: (amount = 10000) => { cheatMoney(amount); console.log(
+"💰 金钱+${amount}"); },
+
+health: () => { cheatFullRestore(); console.log('❤️ 状态回满'); },
+
+god: () => { cheatGodMode(); console.log('✨ 上帝模式'); },
+
+scene: (sceneId) => { jumpToScene(sceneId); console.log(
+"📍 跳转到 ${sceneId}"); },
+
+menu: () => { toggleDevMenu(); console.log('🛠️ 开发者菜单'); }
+
+};
+
+console.log('🎮 游戏已加载！');
+
+console.log('🛠️ 输入 cheat.menu() 打开开发者菜单');
+
+console.log('💰 输入 cheat.money(5000) 加5000金钱');
+
+console.log('✨ 输入 cheat.god() 开启上帝模式');
+
+</script>
+
+</body>
+
+</html>]]></yb_code>
+
+</yb_canvas>
